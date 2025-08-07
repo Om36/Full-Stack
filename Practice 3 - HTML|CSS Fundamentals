@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Admin Dashboard</title>
+        <style>
+            :root {
+                --bg-color: #ffffff;
+                --text-color: #222222;
+                --header-bg: #008000;
+                --sidebar-bg: #e0e0e0;
+                --footer-bg: #008000;
+                --link-color: #333333;
+            }
+
+            body.dark-theme {
+                --bg-color: #1f1f1f;
+                --text-color: #f5f5f5;
+                --header-bg: #2c2c2c;
+                --sidebar-bg: #292929;
+                --footer-bg: #2c2c2c;
+                --link-color: #dddddd;
+            }
+
+            body {
+                margin: 0;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background-color: var(--bg-color);
+                color: var(--text-color);
+                transition: background-color 0.3s, color 0.3s;
+            }
+
+            .dashboard-container {
+                display: grid;
+                grid-template-areas:
+                    "header header"
+                    "sidebar main"
+                    "footer footer";
+                grid-template-columns: 200px 1fr;
+                grid-template-rows: 60px 1fr 40px;
+                height: 100vh;
+            }
+
+            .header {
+                grid-area: header;
+                background-color: var(--header-bg);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 0 20px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                -webkit-text-fill-color: #f5f5f5;
+            }
+
+            .sidebar {
+                grid-area: sidebar;
+                background-color: var(--sidebar-bg);
+                padding: 20px;
+            }
+
+            .main-content {
+                grid-area: main;
+                padding: 20px;
+            }
+            .footer {
+                grid-area: footer;
+                background-color: var(--footer-bg);
+                text-align: center;
+                padding: 10px;
+                font-size: 0.9em;
+                -webkit-text-fill-color: #f5f5f5;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="dashboard-container">
+            <header class="header">
+                <h1>Admin Dashboard</h1>
+                <label class="switch">
+                    <input type="checkbox" id="theme-toggle" onclick="document.body.classList.toggle('dark-theme')">
+                    Dark Mode
+                </label>
+                <script>
+                    document.getElementById('theme-toggle').addEventListener('change', function() {
+                        document.body.classList.toggle('dark-theme', this.checked);
+                    });
+                </script>
+
+            </header>
+            <aside class="sidebar">
+                <nav>
+                    <ul>
+                        <li><a href="#">Home</a></li>
+                        <li><a href="#">Users</a></li>
+                        <li><a href="#">Settings</a></li>
+                    </ul>
+                </nav>
+            </aside>
+            <main class="main-content">
+                <h2>Welcome, Admin!</h2>
+                <p>This is the main content area. Add charts, tables, or reports here,</p>
+            </main>
+            <footer class="footer">
+                <p>&copy; 2025 Admin Panel</p>
+            </footer>
+        </div>
+    </body>
+</html>
