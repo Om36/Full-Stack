@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Dynamic Product Filter</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+    }
+    select {
+      margin-bottom: 20px;
+      padding: 10px;
+      font-size: 16px;
+    }
+    .product-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .product {
+      border: 1px solid #ccc;
+      padding: 15px;
+      border-radius: 8px;
+      width: 200px;
+    }
+    .product h3 {
+      margin: 0 0 10px 0;
+    }
+    .product p {
+      margin: 0;
+      color: gray;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Product List</h1>
+
+  <label for="categoryFilter">Filter by Category:</label>
+  <select id="categoryFilter">
+    <option value="all">All</option>
+    <option value="shoes">Shoes</option>
+    <option value="shirts">Shirts</option>
+    <option value="gadgets">Gadgets</option>
+  </select>
+
+  <div class="product-container" id="productContainer">
+  </div>
+
+  <script>
+    const products = [
+      { name: "Running Shoes", category: "shoes" },
+      { name: "Casual Sneakers", category: "shoes" },
+      { name: "Formal Shirt", category: "shirts" },
+      { name: "T-Shirt", category: "shirts" },
+      { name: "Smartphone", category: "gadgets" },
+      { name: "Wireless Earbuds", category: "gadgets" },
+    ];
+
+    const productContainer = document.getElementById('productContainer');
+    const categoryFilter = document.getElementById('categoryFilter');
+    function displayProducts(filteredProducts) {
+      productContainer.innerHTML = '';
+      if (filteredProducts.length === 0) {
+        productContainer.innerHTML = '<p>No products found.</p>';
+        return;
+      }
+      filteredProducts.forEach(product => {
+        const productDiv = document.createElement('div');
+        productDiv.className = 'product';
+        productDiv.innerHTML = `
+          <h3>${product.name}</h3>
+          <p>Category: ${product.category}</p>
+        `;
+        productContainer.appendChild(productDiv);
+      });
+    }
+    displayProducts(products);
+    categoryFilter.addEventListener('change', function () {
+      const selectedCategory = this.value;
+
+      if (selectedCategory === 'all') {
+        displayProducts(products);
+      } else {
+        const filtered = products.filter(p => p.category === selectedCategory);
+        displayProducts(filtered);
+      }
+    });
+  </script>
+
+</body>
+</html>
