@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SVG Drawing Tool</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        .drawing-area {
+            margin-top: 20px;
+            text-align: center;
+            border: 1px solid black;
+            padding: 10px;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        svg {
+            background-color: #f9f9f9;
+            cursor: crosshair;
+        }
+        select {
+            margin: 0 10px 10px 0;
+            padding: 4px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="drawing-area">
+        <h1>SVG Drawing Tool</h1>
+        <svg id="drawingArea" width="600" height="400" style="border: 1px solid #ccc;"></svg>
+    </div>
+
+    <div id="controls" style="margin-top: 10px;">
+        <label for="shapeSelect">Shape:</label>
+        <select id="shapeSelect">
+            <option value="scribble">Scribble (Freehand)</option>
+            <option value="rectangle">Rectangle</option>
+            <option value="line">Line</option>
+            <!-- Add more shapes here if needed -->
+        </select>
+
+        <label for="strokeColorSelect">Stroke Color:</label>
+        <select id="strokeColorSelect">
+            <option value="#000000" style="background-color:#000000;color:#fff;">Black</option>
+            <option value="#FF0000" style="background-color:#FF0000;">Red</option>
+            <option value="#00FF00" style="background-color:#00FF00;">Green</option>
+            <option value="#0000FF" style="background-color:#0000FF;color:#fff;">Blue</option>
+            <option value="#FFFF00" style="background-color:#FFFF00;">Yellow</option>
+            <option value="#FF00FF" style="background-color:#FF00FF;">Magenta</option>
+            <option value="#00FFFF" style="background-color:#00FFFF;">Cyan</option>
+        </select>
+
+        <label for="strokeWidthSelect">Stroke Width:</label>
+        <select id="strokeWidthSelect">
+            <option value="1">1 px</option>
+            <option value="2" selected>2 px</option>
+            <option value="3">3 px</option>
+            <option value="4">4 px</option>
+            <option value="5">5 px</option>
+        </select>
+    </div>
+
+    <script>
+        const svg = document.getElementById('drawingArea');
+
+        let isDrawing = false;
+        let startX = 0;
+        let startY = 0;
+        let currentShape = null;
+        let points = []; // For scribble points
+
+        // Controls
+        const shapeSelect = document.getElementById('shapeSelect');
+        const strokeColorSelect = document.getElementById('strokeColorSelect');
+        const strokeWidthSelect = document.getElementById('strokeWidthSelect');
+
+        function getMousePosition(evt) {
+            const CTM = svg.getScreenCTM();
+            return {
+                x: (evt.clientX - CTM.e) / CTM.a,
+                y: (evt.clientY - CTM.f) / CTM.d
+            };
+        }
+
+        svg.addEventListener('mousedown', (evt) => {
+            isDrawing = true;
+            const pos = getMousePosition(evt);
+            startX = pos.x;
+            startY = pos.y;
+
+            const shapeType = shapeSelect.value;
+            const strokeColor = strokeColorSelect.value;
+            const strokeWidth = strokeWidthSelect.value;
+
+            if (shapeType === 'rectangle') {
+                currentShape = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                currentShape.setAttribute('x', startX);
+                currentShape.setAttribute('y', startY);
+                currentShape.setAttribute('width', 0);
+                currentShape.setAttribute('height', 0);
+                currentShape.setAttribute('stroke', strokeColor);
+                currentShape.setAttribute('stroke-width', strokeWidth);
+                currentShape.setAttribute('fill', 'transparent');
+                svg.appendChild(currentShape);
+
+            } else if (shapeType === 'line') {
+                currentShape = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                currentShape.setAttribute('x1', startX);
+                currentShape.setAttribute('y1', startY);
+                currentShape.setAttribute('x2', startX);
+                currentShape.setAttribute('y2', startY);
+                currentShape.setAttribute('stroke', strokeColor);
+                currentShape.setAttribute('stroke-width', strokeWidth);
+                svg.appendChild(currentShape);
+
+            } else if (shapeType === 'scribble') {
+                currentShape = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+                points = [`${startX},${startY}`];
+                currentShape.setAttribute('points', points.join(' '));
+                currentShape.setAttribute('stroke', strokeColor);
+                currentShape.setAttribute('stroke-width', strokeWidth);
+                currentShape.setAttribute('fill', 'none');
+                currentShape.setAttribute('stroke-linejoin', 'round');
+                currentShape.setAttribute('stroke-linecap', 'round');
+                svg.appendChild(currentShape);
+            }
+        });
+
+        svg.addEventListener('mousemove', (evt) => {
+            if (!isDrawing) return;
+
+            const pos = getMousePosition(evt);
+            const shapeType = shapeSelect.value;
+
+            if (shapeType === 'rectangle' && currentShape) {
+                const x = Math.min(pos.x, startX);
+                const y = Math.min(pos.y, startY);
+                const width = Math.abs(pos.x - startX);
+                const height = Math.abs(pos.y - startY);
+
+                currentShape.setAttribute('x', x);
+                currentShape.setAttribute('y', y);
+                currentShape.setAttribute('width', width);
+                currentShape.setAttribute('height', height);
+
+            } else if (shapeType === 'line' && currentShape) {
+                currentShape.setAttribute('x2', pos.x);
+                currentShape.setAttribute('y2', pos.y);
+
+            } else if (shapeType === 'scribble' && currentShape) {
+                points.push(`${pos.x},${pos.y}`);
+                currentShape.setAttribute('points', points.join(' '));
+            }
+        });
+
+        svg.addEventListener('mouseup', (evt) => {
+            if (isDrawing) {
+                isDrawing = false;
+                currentShape = null;
+                points = [];
+            }
+        });
+
+        svg.addEventListener('mouseleave', (evt) => {
+            // Stop drawing if mouse leaves SVG area
+            if (isDrawing) {
+                isDrawing = false;
+                currentShape = null;
+                points = [];
+            }
+        });
+    </script>
+</body>
+</html>
