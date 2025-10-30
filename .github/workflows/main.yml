@@ -1,0 +1,59 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: {}
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # List of package folders to target. Each matrix entry runs the steps in that folder.
+        package:
+          - "."
+          - "account-transfer-api"
+          - "Exp4.1"
+          - "Exp4.2"
+          - "Exp4.3"
+          - "Exp7.1/backend"
+          - "Exp7.1/frontend"
+          - "Exp7.2/backend"
+          - "Exp7.2/frontend"
+          - "Exp7.3/backend"
+          - "Exp7.3/frontend"
+          - "Exp8.1/backend"
+          - "Exp8.1/frontend"
+          - "Exp8.2"
+          - "Exp8.3"
+          - "Exp9.1/my-react-app"
+          - "express-middleware-demo"
+          - "jwt-banking-api"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'
+
+      - name: Install, test and build (per package)
+        # run commands inside each package folder; use --if-present so missing scripts don't fail the job
+        run: |
+          echo "=== Running in package: ${{ matrix.package }} ==="
+          cd "${{ matrix.package }}"
+          # prefer npm ci when lockfile exists, fallback to npm install
+          if [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+          npm run test --if-present
+          npm run build --if-present
+        shell: bash
+
+  # Optional: add deploy jobs here if you want to deploy artifacts from specific packages
