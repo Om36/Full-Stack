@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<head>
+  <title>Banking UI</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f2f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .banking-container {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    .balance-card {
+      background: #fff;
+      color: #45a049;
+      padding: 1.5rem;
+      border-radius: 8px;
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 2rem;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn {
+      flex: 1 1 120px;
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .btn-deposit {
+      background-color: #4caf50;
+      color: white;
+    }
+
+    .btn-withdraw {
+      background-color: #f44336;
+      color: white;
+    }
+    @media (max-width: 600px) {
+      .balance-card {
+        font-size: 1.2rem;
+        padding: 1rem;
+      }
+      .btn {
+        flex: 1 1 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="banking-container">
+    <div class="balance-card">
+      Balance: $0
+    </div>
+    <div class="button-group">
+      <br><button class="btn btn-deposit">Deposit</button><br><br>
+      <br><button class="btn btn-withdraw">Withdraw</button><br><br>
+    </div>
+  </div>
+</body>
+</html>
