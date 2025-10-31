@@ -1,9 +1,14 @@
 name: CI/CD Pipeline
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  packages: write
+
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   workflow_dispatch: {}
 
 jobs:
@@ -11,38 +16,39 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        # List of package folders to target. Each matrix entry runs the steps in that folder.
-        package:
-          - "."
-          - "account-transfer-api"
-          - "Exp3.1"
-          - "Exp3.2"
-          - "Exp3.3"
-          - "Exp4.1"
-          - "Exp4.2"
-          - "Exp4.3"
-          - "Exp5.1"
-          - "Exp5.2"
-          - "Exp5.3"
-          - "Exp7.1/backend"
-          - "Exp7.1/frontend"
-          - "Exp7.2/backend"
-          - "Exp7.2/frontend"
-          - "Exp7.3/backend"
-          - "Exp7.3/frontend"
-          - "Exp8.1/backend"
-          - "Exp8.1/frontend"
-          - "Exp8.2"
-          - "Exp8.3"
-          - "Exp9.1/my-react-app"
-          - "express-middleware-demo"
-          - "jwt-banking-api"
-          - "Exp1.1"
-          - "Exp1.2"
-          - "Exp1.3"
-          - "Exp2.1"
-          - "Exp2.2"
-          - "Exp2.3"
+        # list of package folders to run against; adjust to your repo layout if needed
+        package: [
+          ".",
+          "account-transfer-api",
+          "Exp3.1",
+          "Exp3.2",
+          "Exp3.3",
+          "Exp4.1",
+          "Exp4.2",
+          "Exp4.3",
+          "Exp5.1",
+          "Exp5.2",
+          "Exp5.3",
+          "Exp7.1/backend",
+          "Exp7.1/frontend",
+          "Exp7.2/backend",
+          "Exp7.2/frontend",
+          "Exp7.3/backend",
+          "Exp7.3/frontend",
+          "Exp8.1/backend",
+          "Exp8.1/frontend",
+          "Exp8.2",
+          "Exp8.3",
+          "Exp9.1/my-react-app",
+          "express-middleware-demo",
+          "jwt-banking-api",
+          "Exp1.1",
+          "Exp1.2",
+          "Exp1.3",
+          "Exp2.1",
+          "Exp2.2",
+          "Exp2.3",
+        ]
 
     steps:
       - name: Checkout repository
@@ -52,20 +58,235 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '18.x'
-
-      - name: Install, test and build (per package)
-        # run commands inside each package folder; use --if-present so missing scripts don't fail the job
+      - name: Compute cache key
+        id: cache-key
+        if: ${{ always() }}
         run: |
-          echo "=== Running in package: ${{ matrix.package }} ==="
-          cd "${{ matrix.package }}"
-          # prefer npm ci when lockfile exists, fallback to npm install
-          if [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ]; then
-            npm ci
+          pkg="${{ matrix.package }}"
+          if [ -f "$pkg/package-lock.json" ]; then
+            h=$(sha1sum "$pkg/package-lock.json" | cut -d' ' -f1)
+          elif [ -f "$pkg/package.json" ]; then
+            h=$(sha1sum "$pkg/package.json" | cut -d' ' -f1)
           else
-            npm install
+            h=$(date +%s)
           fi
-          npm run test --if-present
-          npm run build --if-present
+          echo "key=$h" >> $GITHUB_OUTPUT
         shell: bash
 
-  # Optional: add deploy jobs here if you want to deploy artifacts from specific packages
+      - name: Cache node modules and npm cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ matrix.package }}/node_modules
+            ~/.npm
+          key: ${{ runner.os }}-node-${{ matrix.package }}-${{ steps.cache-key.outputs.key }}
+
+      - name: Install dependencies (if package.json exists)
+        run: |
+          echo "=== Package: ${{ matrix.package }} ==="
+          if [ -d "${{ matrix.package }}" ] && [ -f "${{ matrix.package }}/package.json" ]; then
+            cd "${{ matrix.package }}"
+            echo "Found package.json in $(pwd)"
+            if [ -f package-lock.json ]; then
+              echo "Using npm ci"
+              npm ci
+            else
+              echo "No lockfile, using npm install"
+              npm install
+            fi
+          else
+            echo "Skipping ${{ matrix.package }}: directory or package.json not found"
+          fi
+        shell: bash
+
+      - name: Run tests (required)
+        run: |
+          if [ -d "${{ matrix.package }}" ] && [ -f "${{ matrix.package }}/package.json" ]; then
+            cd "${{ matrix.package }}"
+            echo "Running tests in $(pwd)"
+            # fail if test script missing
+            if jq -e '.scripts.test' package.json > /dev/null; then
+              npm run test
+            else
+              echo "ERROR: 'test' script missing in package.json for ${{ matrix.package }}"
+              exit 1
+            fi
+          else
+            echo "Skipping tests for ${{ matrix.package }}: package.json not found"
+          fi
+        shell: bash
+
+      - name: Build (required)
+        run: |
+          if [ -d "${{ matrix.package }}" ] && [ -f "${{ matrix.package }}/package.json" ]; then
+            cd "${{ matrix.package }}"
+            echo "Building in $(pwd)"
+            # fail if build script missing
+            if jq -e '.scripts.build' package.json > /dev/null; then
+              npm run build
+            else
+              echo "ERROR: 'build' script missing in package.json for ${{ matrix.package }}"
+              exit 1
+            fi
+          else
+            echo "Skipping build for ${{ matrix.package }}: package.json not found"
+          fi
+        shell: bash
+
+  # Optional: add deploy jobs here (e.g., GitHub Pages, Netlify, S3). Add explicit job(s) and use
+  # needs: build-and-test to depend on successful build; restrict deployment to selected packages.
+
+  deploy-pages:
+    name: Deploy static packages to GitHub Pages (combined site)
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'
+
+      - name: Build frontends and assemble site
+        run: |
+          set -euo pipefail
+          # List of packages that produce static builds
+          pkgs=(
+            "Exp9.1/my-react-app"
+            "Exp8.1/frontend"
+            "Exp7.2/frontend"
+            "Exp7.3/frontend"
+            "Exp7.1/frontend"
+            "Exp3.2"
+            "Exp3.1"
+          )
+
+          rm -rf site || true
+          mkdir -p site
+
+          for pkg in "${pkgs[@]}"; do
+            echo "\n=== Processing $pkg ==="
+            if [ -d "$pkg" ] && [ -f "$pkg/package.json" ]; then
+              pushd "$pkg"
+              echo "Building in $(pwd)"
+
+              # install
+              if [ -f package-lock.json ]; then
+                npm ci
+              else
+                npm install
+              fi
+
+              # determine build tool and build with proper base for subpath
+              SUBDIR="${pkg//\//-}"
+
+              if grep -q 'react-scripts' package.json 2>/dev/null; then
+                echo "Detected react-scripts; building with PUBLIC_URL=/$SUBDIR"
+                PUBLIC_URL="/$SUBDIR" npm run build
+                OUTDIR=build
+              elif grep -q 'vite' package.json 2>/dev/null || grep -q 'vite' package.json 2>/dev/null; then
+                echo "Detected Vite; building with base=/$SUBDIR/"
+                npm run build -- --base "/$SUBDIR/"
+                OUTDIR=dist
+              else
+                echo "Unknown bundler; running npm run build and trying to guess output dir"
+                npm run build
+                if [ -d build ]; then OUTDIR=build; elif [ -d dist ]; then OUTDIR=dist; else
+                  echo "No build output for $pkg; skipping"
+                  popd
+                  continue
+                fi
+              fi
+
+              # copy to combined site folder
+              mkdir -p "$(pwd)/../../site/$SUBDIR"
+              cp -r "$OUTDIR"/* "$(pwd)/../../site/$SUBDIR/"
+              echo "Copied $OUTDIR to site/$SUBDIR/"
+              popd
+            else
+              echo "Package $pkg missing or package.json not found; skipping"
+            fi
+          done
+
+          ls -la site || true
+        shell: bash
+
+      - name: Upload combined site artifact for GitHub Pages
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: site
+
+      - name: Deploy combined site to GitHub Pages
+        uses: actions/deploy-pages@v1
+
+  publish-backends:
+    name: Build and push backend Docker images to GHCR
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: github.ref == 'refs/heads/main'
+    strategy:
+      matrix:
+        backend: [
+          "account-transfer-api",
+          "jwt-banking-api",
+          "Exp7.1/backend",
+          "Exp7.2/backend",
+          "Exp7.3/backend",
+          "Exp8.1/backend",
+        ]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up QEMU (for multi-platform builds)
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Validate GHCR secrets
+        env:
+          GHCR_PAT: ${{ secrets.GHCR_PAT }}
+          GHCR_USER: ${{ secrets.GHCR_USER }}
+        run: |
+          if [ -z "${GHCR_PAT:-}" ]; then
+            echo "ERROR: repository secret GHCR_PAT is not set. Create it in Settings → Secrets → Actions." >&2
+            exit 1
+          fi
+          if [ -z "${GHCR_USER:-}" ]; then
+            echo "WARNING: GHCR_USER not set. The workflow will use github.actor as the username to log in."
+          else
+            echo "Using GHCR_USER=${GHCR_USER}"
+          fi
+
+      - name: Log in to GHCR (manual)
+        env:
+          GHCR_PAT: ${{ secrets.GHCR_PAT }}
+          GHCR_USER: ${{ secrets.GHCR_USER }}
+        run: |
+          set -euo pipefail
+          # use GHCR_USER if provided, otherwise fall back to github actor
+          LOGIN_USER="${GHCR_USER:-${GITHUB_ACTOR}}"
+          echo "Logging in as $LOGIN_USER"
+          echo "$GHCR_PAT" | docker login ghcr.io -u "$LOGIN_USER" --password-stdin
+
+      - name: Build and push image
+        env:
+          REPO_OWNER: ${{ github.repository_owner }}
+          REPO_NAME: ${{ github.event.repository.name }}
+        run: |
+          set -euo pipefail
+          pkg="${{ matrix.backend }}"
+          if [ ! -d "$pkg" ] || [ ! -f "$pkg/Dockerfile" ]; then
+            echo "No Dockerfile in $pkg; attempting to build context anyway if package.json exists"
+          fi
+          img_suffix=$(echo "$pkg" | tr '/' '-')
+          image=ghcr.io/${REPO_OWNER}/${REPO_NAME}-$img_suffix
+          echo "Building image $image"
+          docker build -t "$image:${{ github.sha }}" -t "$image:latest" "$pkg"
+          docker push "$image:${{ github.sha }}"
+          docker push "$image:latest"
+        shell: bash
