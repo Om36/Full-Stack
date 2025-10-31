@@ -15,9 +15,15 @@ jobs:
         package:
           - "."
           - "account-transfer-api"
+          - "Exp3.1"
+          - "Exp3.2"
+          - "Exp3.3"
           - "Exp4.1"
           - "Exp4.2"
           - "Exp4.3"
+          - "Exp5.1"
+          - "Exp5.2"
+          - "Exp5.3"
           - "Exp7.1/backend"
           - "Exp7.1/frontend"
           - "Exp7.2/backend"
@@ -31,7 +37,12 @@ jobs:
           - "Exp9.1/my-react-app"
           - "express-middleware-demo"
           - "jwt-banking-api"
-          -
+          - "Exp1.1"
+          - "Exp1.2"
+          - "Exp1.3"
+          - "Exp2.1"
+          - "Exp2.2"
+          - "Exp2.3"
 
     steps:
       - name: Checkout repository
