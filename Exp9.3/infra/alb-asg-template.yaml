@@ -1,0 +1,383 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >-
+  CloudFormation template to create a VPC, public subnets, an Internet Gateway,
+  an Application Load Balancer (ALB) and an Auto Scaling Group (ASG) of backend
+  EC2 instances. Backend instances will register with the ALB target group on
+  port 3000 and health-check /api. UserData should be provided via LaunchTemplate
+  to clone your repo and start the backend service.
+
+Parameters:
+  KeyName:
+    Type: String
+    Description: EC2 KeyPair name for SSH access to instances (must exist)
+  InstanceType:
+    Type: String
+    Default: t3.nano
+    Description: EC2 instance type for backend nodes
+  SSHLocation:
+    Type: String
+    Default: 0.0.0.0/0
+    Description: CIDR allowed to SSH to instances (only for admin use). Use a narrow CIDR for production.
+  GitRepoUrl:
+    Type: String
+    Description: HTTPS Git repository URL that contains the backend application (used in user-data)
+  GitBranch:
+    Type: String
+    Default: main
+    Description: Git branch to checkout
+  DesiredCapacity:
+    Type: Number
+    Default: 2
+    Description: Desired number of backend instances in the ASG
+  DomainName:
+    Type: String
+    Default: ""
+    Description: Optional - your domain name for HTTPS (e.g. example.com). Leave empty to skip ACM/certificate creation.
+  HostedZoneId:
+    Type: String
+    Default: ""
+    Description: Optional - Route53 Hosted Zone ID for your domain. If provided, the template will create the DNS validation record automatically.
+
+Mappings:
+  AWSRegionToAMI:
+    us-east-1:
+      AMI: ami-0ac80df6eff0e70b5 # Amazon Linux 2 (update as needed)
+    us-west-2:
+      AMI: ami-0b2f6494ff0b07a0e
+
+Conditions:
+  CreateCertificate: !Not [ !Equals [ !Ref DomainName, "" ] ]
+  UseHostedZone: !Not [ !Equals [ !Ref HostedZoneId, "" ] ]
+
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: alb-asg-vpc
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: alb-igw
+
+  VPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+
+  PublicSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.1.0/24
+      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: public-subnet-a
+
+  PublicSubnetB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.2.0/24
+      AvailabilityZone: !Select [ 1, !GetAZs '' ]
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: public-subnet-b
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: public-rt
+
+  PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: VPCGatewayAttachment
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  SubnetARouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetA
+      RouteTableId: !Ref PublicRouteTable
+
+  SubnetBRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetB
+      RouteTableId: !Ref PublicRouteTable
+
+  ALBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow HTTP(S) to ALB
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+
+  InstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow traffic from ALB and SSH from admin CIDR
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 3000
+          ToPort: 3000
+          SourceSecurityGroupId: !Ref ALBSecurityGroup
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: !Ref SSHLocation
+
+  ApplicationLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: backend-alb
+      Subnets:
+        - !Ref PublicSubnetA
+        - !Ref PublicSubnetB
+      SecurityGroups:
+        - !Ref ALBSecurityGroup
+      Scheme: internet-facing
+      Type: application
+
+  ALBTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: backend-targets
+      Port: 3000
+      Protocol: HTTP
+      VpcId: !Ref VPC
+      TargetType: instance
+      HealthCheckProtocol: HTTP
+      HealthCheckPort: '3000'
+      HealthCheckPath: /api
+      Matcher:
+        HttpCode: 200
+
+  FrontendTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: frontend-targets
+      Port: 80
+      Protocol: HTTP
+      VpcId: !Ref VPC
+      TargetType: instance
+      HealthCheckProtocol: HTTP
+      HealthCheckPort: '80'
+      HealthCheckPath: /
+      Matcher:
+        HttpCode: 200
+
+  ALBListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref FrontendTargetGroup
+      LoadBalancerArn: !Ref ApplicationLoadBalancer
+      Port: 80
+      Protocol: HTTP
+
+  ALBApiListenerRule:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      ListenerArn: !Ref ALBListener
+      Priority: 1
+      Conditions:
+        - Field: path-pattern
+          Values:
+            - /api/*
+            - /api
+      Actions:
+        - Type: forward
+          TargetGroupArn: !Ref ALBTargetGroup
+
+  # ACM Certificate (optional). Created only if DomainName is provided.
+  ACMCertificate:
+    Type: AWS::CertificateManager::Certificate
+    Condition: CreateCertificate
+    Properties:
+      DomainName: !Ref DomainName
+      ValidationMethod: DNS
+
+  # If HostedZoneId is provided, create the validation record automatically.
+  ACMValidationRecord:
+    Type: AWS::Route53::RecordSet
+    Condition: UseHostedZone
+    Properties:
+      HostedZoneId: !Ref HostedZoneId
+      Name: !GetAtt ACMCertificate.DomainValidationOptions.0.ResourceRecord.Name
+      Type: !GetAtt ACMCertificate.DomainValidationOptions.0.ResourceRecord.Type
+      TTL: '300'
+      ResourceRecords:
+        - !GetAtt ACMCertificate.DomainValidationOptions.0.ResourceRecord.Value
+
+  # HTTPS listener that uses the ACM certificate. Created only when a DomainName is supplied.
+  ALBListenerHTTPS:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Condition: CreateCertificate
+    Properties:
+      LoadBalancerArn: !Ref ApplicationLoadBalancer
+      Port: 443
+      Protocol: HTTPS
+      Certificates:
+        - CertificateArn: !Ref ACMCertificate
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref FrontendTargetGroup
+
+  # Listener rule to route /api to backend on HTTPS listener when certificate exists
+  ALBApiListenerRuleHTTPS:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Condition: CreateCertificate
+    Properties:
+      ListenerArn: !Ref ALBListenerHTTPS
+      Priority: 1
+      Conditions:
+        - Field: path-pattern
+          Values:
+            - /api/*
+            - /api
+      Actions:
+        - Type: forward
+          TargetGroupArn: !Ref ALBTargetGroup
+
+  BackendLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateData:
+        InstanceType: !Ref InstanceType
+        KeyName: !Ref KeyName
+        ImageId: !FindInMap [AWSRegionToAMI, !Ref 'AWS::Region', AMI]
+        SecurityGroupIds:
+          - !Ref InstanceSecurityGroup
+        UserData: !Base64 !Sub |
+          #!/bin/bash -xe
+          # Update and install prerequisites
+          yum update -y
+          # Install Docker and git
+          amazon-linux-extras install -y docker
+          service docker start
+          yum install -y git
+          usermod -a -G docker ec2-user || true
+
+          # Clone application repository into /opt/app
+          if [ ! -d /opt/app ]; then
+            git clone --single-branch --branch ${GitBranch} ${GitRepoUrl} /opt/app
+          else
+            cd /opt/app && git pull || true
+          fi
+
+          cd /opt/app
+
+          # Build and run backend as Docker container
+          if [ -f ./backend/Dockerfile ] || [ -d ./backend ]; then
+            docker build -t backend:latest ./backend
+            docker rm -f backend || true
+            docker run -d --name backend -p 3000:3000 --restart unless-stopped backend:latest
+          else
+            # fallback: run with npm if Dockerfile isn't present
+            cd ./backend || true
+            npm install --production
+            NODE_PORT=3000 PORT=3000 nohup npm start &>/var/log/backend.log &
+          fi
+
+  BackendAutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      VPCZoneIdentifier:
+        - !Ref PublicSubnetA
+        - !Ref PublicSubnetB
+      LaunchTemplate:
+        LaunchTemplateId: !Ref BackendLaunchTemplate
+        Version: !GetAtt BackendLaunchTemplate.LatestVersionNumber
+      MinSize: '1'
+      MaxSize: '4'
+      DesiredCapacity: !Ref DesiredCapacity
+      TargetGroupARNs:
+        - !Ref ALBTargetGroup
+
+  FrontendLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateData:
+        InstanceType: !Ref InstanceType
+        KeyName: !Ref KeyName
+        ImageId: !FindInMap [AWSRegionToAMI, !Ref 'AWS::Region', AMI]
+        SecurityGroupIds:
+          - !Ref InstanceSecurityGroup
+        UserData: !Base64 !Sub |
+          #!/bin/bash -xe
+          yum update -y
+          amazon-linux-extras install -y docker
+          service docker start
+          yum install -y git
+          usermod -a -G docker ec2-user || true
+
+          # Clone application repository into /opt/app
+          if [ ! -d /opt/app ]; then
+            git clone --single-branch --branch ${GitBranch} ${GitRepoUrl} /opt/app
+          else
+            cd /opt/app && git pull || true
+          fi
+
+          cd /opt/app
+
+          # Build and run frontend container
+          if [ -f ./frontend/Dockerfile ] || [ -d ./frontend ]; then
+            docker build -t frontend:latest ./frontend
+            docker rm -f frontend || true
+            docker run -d --name frontend -p 80:80 --restart unless-stopped frontend:latest
+          else
+            cd ./frontend || true
+            npm install --production
+            nohup npm run preview -- --port 80 &>/var/log/frontend.log &
+          fi
+
+  FrontendAutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      VPCZoneIdentifier:
+        - !Ref PublicSubnetA
+        - !Ref PublicSubnetB
+      LaunchTemplate:
+        LaunchTemplateId: !Ref FrontendLaunchTemplate
+        Version: !GetAtt FrontendLaunchTemplate.LatestVersionNumber
+      MinSize: '1'
+      MaxSize: '4'
+      DesiredCapacity: !Ref DesiredCapacity
+      TargetGroupARNs:
+        - !Ref FrontendTargetGroup
+
+Outputs:
+  LoadBalancerDNS:
+    Description: DNS name of the Application Load Balancer
+    Value: !GetAtt ApplicationLoadBalancer.DNSName
+  TargetGroupArn:
+    Description: Target Group ARN
+    Value: !Ref ALBTargetGroup

@@ -1,0 +1,245 @@
+{
+  "stats": {
+    "suites": 2,
+    "tests": 1,
+    "passes": 0,
+    "pending": 0,
+    "failures": 1,
+    "start": "2025-11-06T18:14:40.360Z",
+    "end": "2025-11-06T18:14:43.383Z",
+    "duration": 3023,
+    "testsRegistered": 5,
+    "passPercent": 0,
+    "pendingPercent": 0,
+    "other": 0,
+    "hasOther": false,
+    "skipped": 4,
+    "hasSkipped": true
+  },
+  "results": [
+    {
+      "uuid": "37a7e104-0560-4465-867b-322550d118fa",
+      "title": "",
+      "fullFile": "cypress\\e2e\\auth.cy.js",
+      "file": "cypress\\e2e\\auth.cy.js",
+      "beforeHooks": [],
+      "afterHooks": [],
+      "tests": [],
+      "suites": [
+        {
+          "uuid": "44a7b83a-4a2d-4953-9839-835d96432acf",
+          "title": "Authentication Flow",
+          "fullFile": "",
+          "file": "",
+          "beforeHooks": [],
+          "afterHooks": [],
+          "tests": [],
+          "suites": [
+            {
+              "uuid": "34457451-f94f-4a71-9588-3de09a83bcf0",
+              "title": "User Registration",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should register a new user successfully",
+                  "fullTitle": "Authentication Flow User Registration should register a new user successfully",
+                  "timedOut": null,
+                  "duration": 163,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "cy.visit('/register');\ncy.get('[data-testid=\"username-input\"]').type('newuser');\ncy.get('[data-testid=\"email-input\"]').type('newuser@example.com');\ncy.get('[data-testid=\"password-input\"]').type('Password123!');\ncy.get('[data-testid=\"confirm-password-input\"]').type('Password123!');\ncy.get('[data-testid=\"register-button\"]').click();\ncy.url().should('include', '/dashboard');\ncy.get('[data-testid=\"welcome-message\"]').should('be.visible');",
+                  "err": {
+                    "message": "CypressError: `cy.request()` failed on:\n\nhttp://localhost:5000/api/test/clear\n\nThe response we received from your web server was:\n\n  > 404: Not Found\n\nThis was considered a failure because the status code was not `2xx` or `3xx`.\n\nIf you do not want status codes to cause failures pass the option: `failOnStatusCode: false`\n\n-----------------------------------------------------------\n\nThe request we sent was:\n\nMethod: POST\nURL: http://localhost:5000/api/test/clear\nHeaders: {\n  \"Connection\": \"keep-alive\",\n  \"user-agent\": \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/142.0.0.0 Safari/537.36\",\n  \"accept\": \"*/*\",\n  \"accept-encoding\": \"gzip, deflate\",\n  \"content-length\": 0\n}\n\n-----------------------------------------------------------\n\nThe response we got was:\n\nStatus: 404 - Not Found\nHeaders: {\n  \"x-powered-by\": \"Express\",\n  \"access-control-allow-origin\": \"*\",\n  \"access-control-allow-headers\": \"Origin, X-Requested-With, Content-Type, Accept\",\n  \"content-security-policy\": \"default-src 'none'\",\n  \"x-content-type-options\": \"nosniff\",\n  \"content-type\": \"text/html; charset=utf-8\",\n  \"content-length\": \"154\",\n  \"date\": \"Thu, 06 Nov 2025 18:14:42 GMT\",\n  \"connection\": \"keep-alive\",\n  \"keep-alive\": \"timeout=5\"\n}\nBody: <!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/test/clear</pre>\n</body>\n</html>\n\nhttps://on.cypress.io/request\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `Authentication Flow`",
+                    "estack": "CypressError: `cy.request()` failed on:\n\nhttp://localhost:5000/api/test/clear\n\nThe response we received from your web server was:\n\n  > 404: Not Found\n\nThis was considered a failure because the status code was not `2xx` or `3xx`.\n\nIf you do not want status codes to cause failures pass the option: `failOnStatusCode: false`\n\n-----------------------------------------------------------\n\nThe request we sent was:\n\nMethod: POST\nURL: http://localhost:5000/api/test/clear\nHeaders: {\n  \"Connection\": \"keep-alive\",\n  \"user-agent\": \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/142.0.0.0 Safari/537.36\",\n  \"accept\": \"*/*\",\n  \"accept-encoding\": \"gzip, deflate\",\n  \"content-length\": 0\n}\n\n-----------------------------------------------------------\n\nThe response we got was:\n\nStatus: 404 - Not Found\nHeaders: {\n  \"x-powered-by\": \"Express\",\n  \"access-control-allow-origin\": \"*\",\n  \"access-control-allow-headers\": \"Origin, X-Requested-With, Content-Type, Accept\",\n  \"content-security-policy\": \"default-src 'none'\",\n  \"x-content-type-options\": \"nosniff\",\n  \"content-type\": \"text/html; charset=utf-8\",\n  \"content-length\": \"154\",\n  \"date\": \"Thu, 06 Nov 2025 18:14:42 GMT\",\n  \"connection\": \"keep-alive\",\n  \"keep-alive\": \"timeout=5\"\n}\nBody: <!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/test/clear</pre>\n</body>\n</html>\n\nhttps://on.cypress.io/request\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `Authentication Flow`\n    at <unknown> (http://localhost:5000/__cypress/runner/cypress_runner.js:135785:72)\n    at tryCatcher (http://localhost:5000/__cypress/runner/cypress_runner.js:1777:23)\n    at Promise._settlePromiseFromHandler (http://localhost:5000/__cypress/runner/cypress_runner.js:1489:31)\n    at Promise._settlePromise (http://localhost:5000/__cypress/runner/cypress_runner.js:1546:18)\n    at Promise._settlePromise0 (http://localhost:5000/__cypress/runner/cypress_runner.js:1591:10)\n    at Promise._settlePromises (http://localhost:5000/__cypress/runner/cypress_runner.js:1671:18)\n    at _drainQueueStep (http://localhost:5000/__cypress/runner/cypress_runner.js:2377:12)\n    at _drainQueue (http://localhost:5000/__cypress/runner/cypress_runner.js:2370:9)\n    at Async._drainQueues (http://localhost:5000/__cypress/runner/cypress_runner.js:2386:5)\n    at Async.drainQueues (http://localhost:5000/__cypress/runner/cypress_runner.js:2256:14)\nFrom Your Spec Code:\n    at Context.eval (webpack://mern/./cypress/support/commands.js:19:5)\n    at wrapped (http://localhost:5000/__cypress/runner/cypress_runner.js:145673:43)",
+                    "diff": null
+                  },
+                  "uuid": "b5ab59e1-456c-4445-9854-0025817c6f0c",
+                  "parentUUID": "34457451-f94f-4a71-9588-3de09a83bcf0",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should show validation errors for invalid input",
+                  "fullTitle": "Authentication Flow User Registration should show validation errors for invalid input",
+                  "timedOut": null,
+                  "duration": 0,
+                  "state": "skipped",
+                  "speed": null,
+                  "pass": false,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "cy.visit('/register');\ncy.get('[data-testid=\"register-button\"]').click();\ncy.get('[data-testid=\"error-message\"]').should('be.visible');\ncy.url().should('include', '/register');",
+                  "err": {},
+                  "uuid": "5b28ee2a-9bc5-4e35-8fe5-d636e1eeed73",
+                  "parentUUID": "34457451-f94f-4a71-9588-3de09a83bcf0",
+                  "isHook": false,
+                  "skipped": true
+                }
+              ],
+              "suites": [],
+              "passes": [],
+              "failures": [
+                "b5ab59e1-456c-4445-9854-0025817c6f0c"
+              ],
+              "pending": [],
+              "skipped": [
+                "5b28ee2a-9bc5-4e35-8fe5-d636e1eeed73"
+              ],
+              "duration": 163,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "bd784a82-ac4b-4302-8c9f-5dbdfbd2569c",
+              "title": "User Login",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should login successfully with valid credentials",
+                  "fullTitle": "Authentication Flow User Login should login successfully with valid credentials",
+                  "timedOut": null,
+                  "duration": 0,
+                  "state": "skipped",
+                  "speed": null,
+                  "pass": false,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "cy.login('test@example.com', 'Password123!');\ncy.url().should('include', '/dashboard');\ncy.get('[data-testid=\"user-menu\"]').should('be.visible');",
+                  "err": {},
+                  "uuid": "40311752-b048-434e-9c9a-53058534801a",
+                  "parentUUID": null,
+                  "isHook": false,
+                  "skipped": true
+                },
+                {
+                  "title": "should show error for invalid credentials",
+                  "fullTitle": "Authentication Flow User Login should show error for invalid credentials",
+                  "timedOut": null,
+                  "duration": 0,
+                  "state": "skipped",
+                  "speed": null,
+                  "pass": false,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "cy.visit('/login');\ncy.get('[data-testid=\"email-input\"]').type('wrong@example.com');\ncy.get('[data-testid=\"password-input\"]').type('wrongpassword');\ncy.get('[data-testid=\"login-button\"]').click();\ncy.get('[data-testid=\"error-message\"]').should('be.visible').and('contain', 'Invalid credentials');",
+                  "err": {},
+                  "uuid": "51e46ea3-cc84-473c-9616-c2f64fd882a8",
+                  "parentUUID": null,
+                  "isHook": false,
+                  "skipped": true
+                }
+              ],
+              "suites": [],
+              "passes": [],
+              "failures": [],
+              "pending": [],
+              "skipped": [
+                "40311752-b048-434e-9c9a-53058534801a",
+                "51e46ea3-cc84-473c-9616-c2f64fd882a8"
+              ],
+              "duration": 0,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "55907766-67ef-4256-a203-7ab3e31a1e75",
+              "title": "User Logout",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should logout successfully",
+                  "fullTitle": "Authentication Flow User Logout should logout successfully",
+                  "timedOut": null,
+                  "duration": 0,
+                  "state": "skipped",
+                  "speed": null,
+                  "pass": false,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "cy.seedData({\n  users: [{\n    email: 'test@example.com',\n    password: 'Password123!',\n    username: 'testuser'\n  }]\n});\ncy.login('test@example.com', 'Password123!');\ncy.get('[data-testid=\"user-menu\"]').click();\ncy.get('[data-testid=\"logout-button\"]').click();\ncy.url().should('include', '/login');\ncy.get('[data-testid=\"user-menu\"]').should('not.exist');",
+                  "err": {},
+                  "uuid": "5d45e7de-cd38-4f41-a8b8-3960bd2cf2ae",
+                  "parentUUID": null,
+                  "isHook": false,
+                  "skipped": true
+                }
+              ],
+              "suites": [],
+              "passes": [],
+              "failures": [],
+              "pending": [],
+              "skipped": [
+                "5d45e7de-cd38-4f41-a8b8-3960bd2cf2ae"
+              ],
+              "duration": 0,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            }
+          ],
+          "passes": [],
+          "failures": [],
+          "pending": [],
+          "skipped": [],
+          "duration": 0,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 2000
+        }
+      ],
+      "passes": [],
+      "failures": [],
+      "pending": [],
+      "skipped": [],
+      "duration": 0,
+      "root": true,
+      "rootEmpty": true,
+      "_timeout": 2000
+    }
+  ],
+  "meta": {
+    "mocha": {
+      "version": "7.2.0"
+    },
+    "mochawesome": {
+      "options": {
+        "quiet": false,
+        "reportFilename": "mochawesome",
+        "saveHtml": true,
+        "saveJson": true,
+        "consoleReporter": "spec",
+        "useInlineDiffs": false,
+        "code": true
+      },
+      "version": "7.1.4"
+    },
+    "marge": {
+      "options": {
+        "reportDir": "cypress/reports",
+        "overwrite": false,
+        "html": true,
+        "json": true
+      },
+      "version": "6.3.2"
+    }
+  }
+}

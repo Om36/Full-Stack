@@ -1,0 +1,257 @@
+{
+  "stats": {
+    "suites": 4,
+    "tests": 4,
+    "passes": 0,
+    "pending": 0,
+    "failures": 4,
+    "start": "2025-11-06T18:32:11.733Z",
+    "end": "2025-11-06T18:33:25.808Z",
+    "duration": 74075,
+    "testsRegistered": 5,
+    "passPercent": 0,
+    "pendingPercent": 0,
+    "other": 0,
+    "hasOther": false,
+    "skipped": 1,
+    "hasSkipped": true
+  },
+  "results": [
+    {
+      "uuid": "68933873-2b64-4baa-bcf4-670991267062",
+      "title": "",
+      "fullFile": "cypress\\e2e\\auth.cy.js",
+      "file": "cypress\\e2e\\auth.cy.js",
+      "beforeHooks": [],
+      "afterHooks": [],
+      "tests": [],
+      "suites": [
+        {
+          "uuid": "63e159b8-f25e-488b-b2c3-f21ac5f18232",
+          "title": "Authentication Flow",
+          "fullFile": "",
+          "file": "",
+          "beforeHooks": [],
+          "afterHooks": [],
+          "tests": [],
+          "suites": [
+            {
+              "uuid": "b7869f36-40c9-458b-a353-60b2ff74cfac",
+              "title": "User Registration",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should register a new user successfully",
+                  "fullTitle": "Authentication Flow User Registration should register a new user successfully",
+                  "timedOut": null,
+                  "duration": 11424,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "cy.visit('/register');\ncy.get('[data-testid=\"username-input\"]').type('newuser');\ncy.get('[data-testid=\"email-input\"]').type('newuser@example.com');\ncy.get('[data-testid=\"password-input\"]').type('Password123!');\ncy.get('[data-testid=\"confirm-password-input\"]').type('Password123!');\ncy.get('[data-testid=\"register-button\"]').click();\ncy.url().should('include', '/dashboard');\ncy.get('[data-testid=\"welcome-message\"]').should('be.visible');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `[data-testid=\"username-input\"]`, but never found it.",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `[data-testid=\"username-input\"]`, but never found it.\n    at Context.eval (webpack://mern/./cypress/e2e/auth.cy.js:11:9)",
+                    "diff": null
+                  },
+                  "uuid": "a62aef61-8ace-4e32-8ade-ecb5c9aad4b7",
+                  "parentUUID": "b7869f36-40c9-458b-a353-60b2ff74cfac",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should show validation errors for invalid input",
+                  "fullTitle": "Authentication Flow User Registration should show validation errors for invalid input",
+                  "timedOut": null,
+                  "duration": 10635,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "cy.visit('/register');\ncy.get('[data-testid=\"register-button\"]').click();\ncy.get('[data-testid=\"error-message\"]').should('be.visible');\ncy.url().should('include', '/register');",
+                  "err": {
+                    "message": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `[data-testid=\"register-button\"]`, but never found it.",
+                    "estack": "AssertionError: Timed out retrying after 10000ms: Expected to find element: `[data-testid=\"register-button\"]`, but never found it.\n    at Context.eval (webpack://mern/./cypress/e2e/auth.cy.js:25:9)",
+                    "diff": null
+                  },
+                  "uuid": "ac3128a4-c832-454c-b805-6fafed9d844f",
+                  "parentUUID": "b7869f36-40c9-458b-a353-60b2ff74cfac",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": [],
+              "failures": [
+                "a62aef61-8ace-4e32-8ade-ecb5c9aad4b7",
+                "ac3128a4-c832-454c-b805-6fafed9d844f"
+              ],
+              "pending": [],
+              "skipped": [],
+              "duration": 22059,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "912a42b9-7fa5-4c73-8113-1eb6e28c0fc7",
+              "title": "User Login",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should login successfully with valid credentials",
+                  "fullTitle": "Authentication Flow User Login should login successfully with valid credentials",
+                  "timedOut": null,
+                  "duration": 211,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "cy.login('test@example.com', 'Password123!');\ncy.url().should('include', '/dashboard');\ncy.get('[data-testid=\"user-menu\"]').should('be.visible');",
+                  "err": {
+                    "message": "CypressError: `cy.request()` failed on:\n\nhttp://localhost:5000/api/test/seed\n\nThe response we received from your web server was:\n\n  > 404: Not Found\n\nThis was considered a failure because the status code was not `2xx` or `3xx`.\n\nIf you do not want status codes to cause failures pass the option: `failOnStatusCode: false`\n\n-----------------------------------------------------------\n\nThe request we sent was:\n\nMethod: POST\nURL: http://localhost:5000/api/test/seed\nHeaders: {\n  \"Connection\": \"keep-alive\",\n  \"user-agent\": \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/142.0.0.0 Safari/537.36\",\n  \"accept\": \"*/*\",\n  \"accept-encoding\": \"gzip, deflate\",\n  \"content-type\": \"application/json\",\n  \"content-length\": 88\n}\nBody: {\"users\":[{\"email\":\"test@example.com\",\"password\":\"Password123!\",\"username\":\"testuser\"}]}\n\n-----------------------------------------------------------\n\nThe response we got was:\n\nStatus: 404 - Not Found\nHeaders: {\n  \"x-powered-by\": \"Express\",\n  \"access-control-allow-origin\": \"*\",\n  \"access-control-allow-headers\": \"Origin, X-Requested-With, Content-Type, Accept\",\n  \"content-security-policy\": \"default-src 'none'\",\n  \"x-content-type-options\": \"nosniff\",\n  \"content-type\": \"text/html; charset=utf-8\",\n  \"content-length\": \"153\",\n  \"date\": \"Thu, 06 Nov 2025 18:33:22 GMT\",\n  \"connection\": \"keep-alive\",\n  \"keep-alive\": \"timeout=5\"\n}\nBody: <!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/test/seed</pre>\n</body>\n</html>\n\nhttps://on.cypress.io/request\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `User Login`",
+                    "estack": "CypressError: `cy.request()` failed on:\n\nhttp://localhost:5000/api/test/seed\n\nThe response we received from your web server was:\n\n  > 404: Not Found\n\nThis was considered a failure because the status code was not `2xx` or `3xx`.\n\nIf you do not want status codes to cause failures pass the option: `failOnStatusCode: false`\n\n-----------------------------------------------------------\n\nThe request we sent was:\n\nMethod: POST\nURL: http://localhost:5000/api/test/seed\nHeaders: {\n  \"Connection\": \"keep-alive\",\n  \"user-agent\": \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/142.0.0.0 Safari/537.36\",\n  \"accept\": \"*/*\",\n  \"accept-encoding\": \"gzip, deflate\",\n  \"content-type\": \"application/json\",\n  \"content-length\": 88\n}\nBody: {\"users\":[{\"email\":\"test@example.com\",\"password\":\"Password123!\",\"username\":\"testuser\"}]}\n\n-----------------------------------------------------------\n\nThe response we got was:\n\nStatus: 404 - Not Found\nHeaders: {\n  \"x-powered-by\": \"Express\",\n  \"access-control-allow-origin\": \"*\",\n  \"access-control-allow-headers\": \"Origin, X-Requested-With, Content-Type, Accept\",\n  \"content-security-policy\": \"default-src 'none'\",\n  \"x-content-type-options\": \"nosniff\",\n  \"content-type\": \"text/html; charset=utf-8\",\n  \"content-length\": \"153\",\n  \"date\": \"Thu, 06 Nov 2025 18:33:22 GMT\",\n  \"connection\": \"keep-alive\",\n  \"keep-alive\": \"timeout=5\"\n}\nBody: <!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/test/seed</pre>\n</body>\n</html>\n\nhttps://on.cypress.io/request\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `User Login`\n    at <unknown> (http://localhost:5000/__cypress/runner/cypress_runner.js:135785:72)\n    at tryCatcher (http://localhost:5000/__cypress/runner/cypress_runner.js:1777:23)\n    at Promise._settlePromiseFromHandler (http://localhost:5000/__cypress/runner/cypress_runner.js:1489:31)\n    at Promise._settlePromise (http://localhost:5000/__cypress/runner/cypress_runner.js:1546:18)\n    at Promise._settlePromise0 (http://localhost:5000/__cypress/runner/cypress_runner.js:1591:10)\n    at Promise._settlePromises (http://localhost:5000/__cypress/runner/cypress_runner.js:1671:18)\n    at _drainQueueStep (http://localhost:5000/__cypress/runner/cypress_runner.js:2377:12)\n    at _drainQueue (http://localhost:5000/__cypress/runner/cypress_runner.js:2370:9)\n    at Async._drainQueues (http://localhost:5000/__cypress/runner/cypress_runner.js:2386:5)\n    at Async.drainQueues (http://localhost:5000/__cypress/runner/cypress_runner.js:2256:14)\nFrom Your Spec Code:\n    at Context.eval (webpack://mern/./cypress/support/commands.js:14:5)\n    at wrapped (http://localhost:5000/__cypress/runner/cypress_runner.js:145673:43)",
+                    "diff": null
+                  },
+                  "uuid": "611b958f-ffb2-47fd-8044-503a8e5574ba",
+                  "parentUUID": "912a42b9-7fa5-4c73-8113-1eb6e28c0fc7",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "should show error for invalid credentials",
+                  "fullTitle": "Authentication Flow User Login should show error for invalid credentials",
+                  "timedOut": null,
+                  "duration": 0,
+                  "state": "skipped",
+                  "speed": null,
+                  "pass": false,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "cy.visit('/login');\ncy.get('[data-testid=\"email-input\"]').type('wrong@example.com');\ncy.get('[data-testid=\"password-input\"]').type('wrongpassword');\ncy.get('[data-testid=\"login-button\"]').click();\ncy.get('[data-testid=\"error-message\"]').should('be.visible').and('contain', 'Invalid credentials');",
+                  "err": {},
+                  "uuid": "f595eab9-9c25-4379-8cbc-cc3c55c4c40c",
+                  "parentUUID": "912a42b9-7fa5-4c73-8113-1eb6e28c0fc7",
+                  "isHook": false,
+                  "skipped": true
+                }
+              ],
+              "suites": [],
+              "passes": [],
+              "failures": [
+                "611b958f-ffb2-47fd-8044-503a8e5574ba"
+              ],
+              "pending": [],
+              "skipped": [
+                "f595eab9-9c25-4379-8cbc-cc3c55c4c40c"
+              ],
+              "duration": 211,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            },
+            {
+              "uuid": "5e1495cd-fb04-430b-9751-82e9033d2572",
+              "title": "User Logout",
+              "fullFile": "",
+              "file": "",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "should logout successfully",
+                  "fullTitle": "Authentication Flow User Logout should logout successfully",
+                  "timedOut": null,
+                  "duration": 488,
+                  "state": "failed",
+                  "speed": null,
+                  "pass": false,
+                  "fail": true,
+                  "pending": false,
+                  "context": null,
+                  "code": "cy.seedData({\n  users: [{\n    email: 'test@example.com',\n    password: 'Password123!',\n    username: 'testuser'\n  }]\n});\ncy.login('test@example.com', 'Password123!');\ncy.get('[data-testid=\"user-menu\"]').click();\ncy.get('[data-testid=\"logout-button\"]').click();\ncy.url().should('include', '/login');\ncy.get('[data-testid=\"user-menu\"]').should('not.exist');",
+                  "err": {
+                    "message": "CypressError: `cy.request()` failed on:\n\nhttp://localhost:5000/api/test/seed\n\nThe response we received from your web server was:\n\n  > 404: Not Found\n\nThis was considered a failure because the status code was not `2xx` or `3xx`.\n\nIf you do not want status codes to cause failures pass the option: `failOnStatusCode: false`\n\n-----------------------------------------------------------\n\nThe request we sent was:\n\nMethod: POST\nURL: http://localhost:5000/api/test/seed\nHeaders: {\n  \"Connection\": \"keep-alive\",\n  \"user-agent\": \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/142.0.0.0 Safari/537.36\",\n  \"accept\": \"*/*\",\n  \"accept-encoding\": \"gzip, deflate\",\n  \"content-type\": \"application/json\",\n  \"content-length\": 88\n}\nBody: {\"users\":[{\"email\":\"test@example.com\",\"password\":\"Password123!\",\"username\":\"testuser\"}]}\n\n-----------------------------------------------------------\n\nThe response we got was:\n\nStatus: 404 - Not Found\nHeaders: {\n  \"x-powered-by\": \"Express\",\n  \"access-control-allow-origin\": \"*\",\n  \"access-control-allow-headers\": \"Origin, X-Requested-With, Content-Type, Accept\",\n  \"content-security-policy\": \"default-src 'none'\",\n  \"x-content-type-options\": \"nosniff\",\n  \"content-type\": \"text/html; charset=utf-8\",\n  \"content-length\": \"153\",\n  \"date\": \"Thu, 06 Nov 2025 18:33:24 GMT\",\n  \"connection\": \"keep-alive\",\n  \"keep-alive\": \"timeout=5\"\n}\nBody: <!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/test/seed</pre>\n</body>\n</html>\n\nhttps://on.cypress.io/request",
+                    "estack": "CypressError: `cy.request()` failed on:\n\nhttp://localhost:5000/api/test/seed\n\nThe response we received from your web server was:\n\n  > 404: Not Found\n\nThis was considered a failure because the status code was not `2xx` or `3xx`.\n\nIf you do not want status codes to cause failures pass the option: `failOnStatusCode: false`\n\n-----------------------------------------------------------\n\nThe request we sent was:\n\nMethod: POST\nURL: http://localhost:5000/api/test/seed\nHeaders: {\n  \"Connection\": \"keep-alive\",\n  \"user-agent\": \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/142.0.0.0 Safari/537.36\",\n  \"accept\": \"*/*\",\n  \"accept-encoding\": \"gzip, deflate\",\n  \"content-type\": \"application/json\",\n  \"content-length\": 88\n}\nBody: {\"users\":[{\"email\":\"test@example.com\",\"password\":\"Password123!\",\"username\":\"testuser\"}]}\n\n-----------------------------------------------------------\n\nThe response we got was:\n\nStatus: 404 - Not Found\nHeaders: {\n  \"x-powered-by\": \"Express\",\n  \"access-control-allow-origin\": \"*\",\n  \"access-control-allow-headers\": \"Origin, X-Requested-With, Content-Type, Accept\",\n  \"content-security-policy\": \"default-src 'none'\",\n  \"x-content-type-options\": \"nosniff\",\n  \"content-type\": \"text/html; charset=utf-8\",\n  \"content-length\": \"153\",\n  \"date\": \"Thu, 06 Nov 2025 18:33:24 GMT\",\n  \"connection\": \"keep-alive\",\n  \"keep-alive\": \"timeout=5\"\n}\nBody: <!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot POST /api/test/seed</pre>\n</body>\n</html>\n\nhttps://on.cypress.io/request\n    at <unknown> (http://localhost:5000/__cypress/runner/cypress_runner.js:135785:72)\n    at tryCatcher (http://localhost:5000/__cypress/runner/cypress_runner.js:1777:23)\n    at Promise._settlePromiseFromHandler (http://localhost:5000/__cypress/runner/cypress_runner.js:1489:31)\n    at Promise._settlePromise (http://localhost:5000/__cypress/runner/cypress_runner.js:1546:18)\n    at Promise._settlePromise0 (http://localhost:5000/__cypress/runner/cypress_runner.js:1591:10)\n    at Promise._settlePromises (http://localhost:5000/__cypress/runner/cypress_runner.js:1671:18)\n    at _drainQueueStep (http://localhost:5000/__cypress/runner/cypress_runner.js:2377:12)\n    at _drainQueue (http://localhost:5000/__cypress/runner/cypress_runner.js:2370:9)\n    at Async._drainQueues (http://localhost:5000/__cypress/runner/cypress_runner.js:2386:5)\n    at Async.drainQueues (http://localhost:5000/__cypress/runner/cypress_runner.js:2256:14)\nFrom Your Spec Code:\n    at Context.eval (webpack://mern/./cypress/support/commands.js:14:5)\n    at wrapped (http://localhost:5000/__cypress/runner/cypress_runner.js:145673:43)",
+                    "diff": null
+                  },
+                  "uuid": "962c3e7a-174b-4fdb-b630-38089e1c5a78",
+                  "parentUUID": "5e1495cd-fb04-430b-9751-82e9033d2572",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": [],
+              "failures": [
+                "962c3e7a-174b-4fdb-b630-38089e1c5a78"
+              ],
+              "pending": [],
+              "skipped": [],
+              "duration": 488,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            }
+          ],
+          "passes": [],
+          "failures": [],
+          "pending": [],
+          "skipped": [],
+          "duration": 0,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 2000
+        }
+      ],
+      "passes": [],
+      "failures": [],
+      "pending": [],
+      "skipped": [],
+      "duration": 0,
+      "root": true,
+      "rootEmpty": true,
+      "_timeout": 2000
+    }
+  ],
+  "meta": {
+    "mocha": {
+      "version": "7.2.0"
+    },
+    "mochawesome": {
+      "options": {
+        "quiet": false,
+        "reportFilename": "mochawesome",
+        "saveHtml": true,
+        "saveJson": true,
+        "consoleReporter": "spec",
+        "useInlineDiffs": false,
+        "code": true
+      },
+      "version": "7.1.4"
+    },
+    "marge": {
+      "options": {
+        "reportDir": "cypress/reports",
+        "overwrite": false,
+        "html": true,
+        "json": true
+      },
+      "version": "6.3.2"
+    }
+  }
+}
